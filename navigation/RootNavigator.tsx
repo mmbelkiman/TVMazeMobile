@@ -4,13 +4,25 @@ import { createSharedElementStackNavigator } from "react-navigation-shared-eleme
 import Home from "../screens/Home";
 import Details from "../screens/Details";
 import EpisodeDetails from "../screens/Episode";
+import Pincode from "../screens/Pincode";
 
 const Stack = createSharedElementStackNavigator();
 
 export default function RootNavigator() {
   return (
     <NavigationContainer>
-      <Stack.Navigator initialRouteName="Home">
+      <Stack.Navigator initialRouteName="Pincode">
+        <Stack.Screen
+          name="PincodeScreen"
+          component={Pincode}
+          options={{
+            title: "",
+            headerTintColor: "#fff",
+            headerStyle: {
+              backgroundColor: "#332e59",
+            },
+          }}
+        />
         <Stack.Screen
           name="HomeScreen"
           component={Home}

@@ -2,34 +2,34 @@ import { StyleSheet } from "react-native";
 
 export default StyleSheet.create({
   container: {
-    flex: 1,
-    backgroundColor: "#0f0f0f",
+    backgroundColor: "#332e59",
+    margin: 1,
+    paddingHorizontal: 10,
+    paddingVertical: 20,
+    borderRadius: 10,
+    flexDirection: "row",
   },
 
-  textGenres: {
+  textEpisodeTitle: {
     fontSize: 18,
     color: "#fff",
     lineHeight: 24,
     marginBottom: 4,
-    backgroundColor: "red",
-    paddingHorizontal: 10,
-    marginHorizontal: 10,
+    marginRight: 60,
   },
 
-  scrollView: {
-    paddingHorizontal: 20,
-    backgroundColor: "#0f0f0f",
-  },
-  image: {
-    height: 300,
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
-  },
-
-  textDescription: {
-    fontSize: 16,
+  textEpisodeAirstamp: {
+    fontSize: 12,
     color: "#fff",
-    marginVertical: 10,
+    lineHeight: 24,
+    marginBottom: 4,
+    marginRight: 60,
+  },
+
+  imageEpisode: {
+    width: 100,
+    height: 100,
+    borderRadius: 20,
   },
 
   name: {
@@ -52,15 +52,5 @@ export default StyleSheet.create({
     height: 30,
     marginRight: 5,
     borderRadius: 10,
-  },
-
-  containerSeason: {
-    paddingTop: 10,
-  },
-
-  textSeasonTitle: {
-    color: "white",
-    fontWeight: "bold",
-    fontSize: 20,
   },
 });

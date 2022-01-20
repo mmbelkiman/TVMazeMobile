@@ -1,20 +1,16 @@
-import LinearGradient from "react-native-linear-gradient";
 import styles from "./styles";
 
 import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
-  Image,
   Text,
   TextInput,
-  TouchableOpacity,
   View,
 } from "react-native";
-import { SharedElement } from "react-navigation-shared-element";
 import { apiSearchShows, apiShowsPage, Show } from "../../api/shows";
-import { icon, image, title } from "../../sharedElements/HomeToDetails";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
+import SerieCard from "./SerieCard";
 
 export default function Home({ navigation }) {
   const [page, setPage] = useState<number>(0);
@@ -26,7 +22,7 @@ export default function Home({ navigation }) {
 
   useEffect(() => {
     setLoading(true);
-    getLastShowsUpdate(page).then((data) => {
+    _getLastShowsUpdate(page).then((data) => {
       setShows(data);
       setLoading(false);
     });
@@ -35,14 +31,14 @@ export default function Home({ navigation }) {
   useEffect(() => {
     if (searchValue.length >= 3) {
       setLoading(true);
-      searchShow(searchValue).then((data) => {
+      _searchShow(searchValue).then((data) => {
         setShowsAtSearch(data);
         setLoading(false);
       });
     }
   }, [searchValue]);
 
-  const searchShow = async (value: string): Promise<Array<Show>> => {
+  const _searchShow = async (value: string): Promise<Array<Show>> => {
     return new Promise((resolve, reject) => {
       return apiSearchShows(value)
         .then(async (searchResult) => {
@@ -60,7 +56,7 @@ export default function Home({ navigation }) {
     });
   };
 
-  const getLastShowsUpdate = async (page: number): Promise<Array<Show>> => {
+  const _getLastShowsUpdate = async (page: number): Promise<Array<Show>> => {
     return new Promise((resolve, reject) => {
       return apiShowsPage(page)
         .then(async (showUpdate) => {
@@ -76,7 +72,7 @@ export default function Home({ navigation }) {
   const _renderHeader = () => (
     <View style={styles.headerContainer}>
       <Text style={styles.headerTitle}>Series in focus</Text>
-      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+      <View style={styles.subHeaderContainer}>
         <Text style={styles.headerSubtitle}>Today</Text>
         <MaterialCommunityIcons
           name="movie-search-outline"
@@ -92,23 +88,17 @@ export default function Home({ navigation }) {
   const _renderHeaderSearch = () => (
     <View style={styles.headerContainer}>
       <Text style={styles.headerTitle}>Search</Text>
-      <View
-        style={{
-          flexDirection: "row",
-          justifyContent: "space-between",
-          paddingTop: 10,
-        }}
-      >
+      <View style={styles.searchContainer}>
         <TextInput
           onChangeText={setSearchValue}
           value={searchValue}
-          style={{ width: "80%", backgroundColor: "#00000033", color: "white" }}
+          style={styles.textInput}
         />
         <MaterialCommunityIcons
           name="close"
           size={28}
           color="#fff"
-          style={{ alignSelf: "center" }}
+          style={styles.iconClose}
           onPress={() => {
             setShowSearching(false);
             setSearchValue("");
@@ -119,67 +109,18 @@ export default function Home({ navigation }) {
     </View>
   );
 
-  const _renderItemIcon = (id: number) => (
-    <SharedElement id={icon.id(id)}>
-      <View style={styles.itemIcon} />
-    </SharedElement>
-  );
-
-  const _renderImage = (id: number, imageUri: string) => (
-    <SharedElement id={image.id(id)}>
-      <Image
-        style={styles.image}
-        source={{ uri: imageUri }}
-        resizeMode="cover"
-      />
-    </SharedElement>
-  );
-
-  const _renderItemTitle = (id: number, name: string) => (
-    <SharedElement id={title.id(id)}>
-      <Text style={styles.textItemTitle}>{name}</Text>
-    </SharedElement>
-  );
-
-  const _renderItem = (item: Show) => (
-    <TouchableOpacity
-      key={item.id}
-      activeOpacity={0.8}
-      style={styles.itemContainer}
-      onPress={() => navigation.navigate("DetailScreen", { item })}
-    >
-      {_renderImage(
-        item.id,
-        item?.image?.original ||
-          "https://media.comicbook.com/files/img/default-movie.png"
-      )}
-      <LinearGradient
-        colors={["#27204211", "#27204299", "#272042ee"]}
-        style={{
-          position: "absolute",
-          bottom: 0,
-          paddingLeft: 20,
-          paddingRight: 30,
-          paddingTop: 20,
-          flexDirection: "row",
-        }}
-      >
-        {_renderItemIcon(item.id)}
-        <View style={styles.itemBottomTextContainer}>
-          {_renderItemTitle(item.id, item.name)}
-        </View>
-      </LinearGradient>
-    </TouchableOpacity>
-  );
-
   const _renderContent = () => (
     <FlatList
       keyExtractor={(item) => `item_${item.id}`}
       data={searchValue.length > 0 ? showsAtSearch : shows}
       contentContainerStyle={styles.contentContainer}
-      renderItem={({ item }) => {
-        return _renderItem(item);
-      }}
+      renderItem={({ item }) => (
+        <SerieCard
+          key={`serieCard_${item.id}`}
+          navigation={navigation}
+          show={item}
+        />
+      )}
       onEndReached={() => setPage(page + 1)}
       ListFooterComponent={() => (loading ? _renderLoading() : <></>)}
     />
@@ -188,9 +129,7 @@ export default function Home({ navigation }) {
   const _renderLoading = () => <ActivityIndicator />;
 
   const _renderSearchRules = () => (
-    <Text
-      style={{ color: "white", textAlign: "center", padding: 10, margin: 10 }}
-    >
+    <Text style={styles.textSearchRule}>
       Type three letters or more to perform a search
     </Text>
   );

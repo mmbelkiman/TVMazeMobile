@@ -11,53 +11,15 @@ export default StyleSheet.create({
     backgroundColor: "#272042",
   },
 
-  itemContainer: {
-    marginBottom: 14,
-  },
-
-  image: {
-    borderRadius: 14,
-    width: 300,
-    height: 300,
-  },
-
-  textItemTitle: {
-    color: "white",
-    fontSize: 24,
-    fontWeight: "bold",
-    lineHeight: 28,
-  },
-
-  textItemDescription: {
-    color: "white",
-    fontSize: 16,
-    fontWeight: "bold",
-    lineHeight: 18,
-  },
-
-  itemIcon: {
-    backgroundColor: "purple",
-    width: 10,
-    height: 30,
-  },
-
-  itemBottomContainer: {
-    position: "absolute",
-    bottom: 20,
-    paddingLeft: 20,
-    paddingRight: 30,
-    flexDirection: "row",
-  },
-
-  itemBottomTextContainer: {
-    flexDirection: "column",
-    paddingLeft: 6,
-  },
-
   headerContainer: {
     marginTop: 50,
     marginBottom: 20,
     paddingHorizontal: 20,
+  },
+
+  subHeaderContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
 
   headerTitle: {
@@ -69,5 +31,28 @@ export default StyleSheet.create({
     color: "#fff",
     fontSize: 32,
     fontWeight: "600",
+  },
+
+  textSearchRule: {
+    color: "white",
+    textAlign: "center",
+    padding: 10,
+    margin: 10,
+  },
+
+  textInput: {
+    width: "80%",
+    backgroundColor: "#00000033",
+    color: "white",
+  },
+
+  iconClose: {
+    alignSelf: "center",
+  },
+
+  searchContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingTop: 10,
   },
 });

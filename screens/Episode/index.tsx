@@ -45,6 +45,9 @@ const EpisodeDetails = ({ navigation, route }) => {
       <ScrollView style={styles.scrollView}>
         <Text style={{ color: "white" }}>Season {item.season}</Text>
         <Text style={{ color: "white" }}>Episode {item.number}</Text>
+        <Text style={{ color: "white", marginVertical: 10 }}>
+          Airdate: {new Date(item.airstamp).toDateString()}
+        </Text>
         <Text style={{ fontSize: 16, color: "#fff", marginVertical: 10 }}>
           {removeHTMLTags(item.summary)}
         </Text>

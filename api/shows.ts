@@ -11,7 +11,7 @@ export interface Show {
   premiered: string;
   ended: string;
   officialSite: string;
-  schedule: any;
+  schedule: schedule;
   rating: any;
   weight: number;
   network: any;
@@ -24,6 +24,10 @@ export interface Show {
   summary: string;
   updated: number;
   _links: any;
+}
+export interface schedule {
+  time: string;
+  days: Array<string>;
 }
 
 export interface Image {

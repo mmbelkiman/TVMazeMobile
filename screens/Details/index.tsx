@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from "react";
 import {
+  ActivityIndicator,
   FlatList,
   Image,
   ImageBackground,
   ScrollView,
   Text,
-  TouchableOpacity,
   View,
 } from "react-native";
 import { SharedElement } from "react-navigation-shared-element";
 import styles from "./styles";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
-import { apiEpisodes, Episode, Show } from "../../api/shows";
+import { apiEpisodes, Episode, schedule, Show } from "../../api/shows";
 import { removeHTMLTags } from "../../utils/string";
 import {
   description,
@@ -19,21 +19,27 @@ import {
   image,
   title,
 } from "../../sharedElements/HomeToDetails";
-
-import { image as imageEpisode } from "../../sharedElements/DetailsToEpisode";
-
-// MaterialCommunityIcons.loadFont();
+import EpisodeCard from "./EpisodeCard";
+import { useDispatch, useSelector } from "react-redux";
+import { toggleLike } from "../../store/actions";
+import GenreContainer from "./GenreContainer";
+import SeasonContainer from "./SeasonContainer";
 
 const Details = ({ navigation, route }) => {
-  const item: Show = route.params.item;
+  const show: Show = route.params.show;
   const [episodes, setEpisodes] = useState<Array<Episode>>([]);
-
   const [seasons, setSeasons] = useState<any>([]);
-
   const [currentSeasonVisible, setCurrentSeasonVisible] = useState<number>(1);
+  const [loading, setLoading] = useState<boolean>(true);
+  const dispatch = useDispatch();
+
+  const liked = useSelector((state) => {
+    return state.tvMazeMobile.liked[show.name + "_" + show.id];
+  });
 
   useEffect(() => {
-    apiEpisodes(item.id)
+    setLoading(true);
+    apiEpisodes(show.id)
       .then((data) => {
         setEpisodes(data);
       })
@@ -50,38 +56,40 @@ const Details = ({ navigation, route }) => {
     });
 
     setSeasons(_seasons);
+    setLoading(false);
   }, [episodes]);
 
-  const _renderSeasons = () => (
-    <View style={{ paddingTop: 10 }}>
-      <Text style={{ color: "white", fontWeight: "bold", fontSize: 20 }}>
-        Seasons
-      </Text>
+  const _renderSchedule = (schedule: schedule, runtime: number = 0) => {
+    const days = schedule.days.map((day, index) => day);
+    const time = schedule.time !== undefined ? "at " + schedule.time : "";
+    const minutes = runtime > 0 ? "(" + runtime + "min)" : "";
+
+    return (
+      <View style={{ paddingTop: 10 }}>
+        <Text style={{ color: "white", fontWeight: "bold", fontSize: 20 }}>
+          Schedule
+        </Text>
+        <Text
+          style={styles.textDescription}
+        >{`${days} ${time} ${minutes}`}</Text>
+      </View>
+    );
+  };
+
+  const _renderSeasons = (seasons) => (
+    <View style={styles.containerSeason}>
+      <Text style={styles.textSeasonTitle}>Seasons</Text>
       <View style={{ padding: 20 }}>
         <FlatList
           data={seasons}
           horizontal={true}
           showsHorizontalScrollIndicator={false}
-          renderItem={({ item, index }) =>
+          renderItem={({ index }) =>
             index > 0 && (
-              <TouchableOpacity
+              <SeasonContainer
+                season={index}
                 onPress={() => setCurrentSeasonVisible(index)}
-                style={{
-                  marginHorizontal: 4,
-                  backgroundColor: "#6c4cc5",
-                  width: 50,
-                  borderRadius: 25,
-                }}
-              >
-                <Text
-                  style={{
-                    color: "white",
-                    textAlign: "center",
-                  }}
-                >
-                  {index}
-                </Text>
-              </TouchableOpacity>
+              />
             )
           }
         />
@@ -89,45 +97,14 @@ const Details = ({ navigation, route }) => {
     </View>
   );
 
-  const _renderEpisodes = (episodes: Array<Show> = []) => (
+  const _renderEpisodes = (episodes: Array<Episode> = []) => (
     <View>
       {episodes.map((episode) => (
-        <TouchableOpacity
+        <EpisodeCard
           key={`episode_${episode.id}`}
-          onPress={() => {
-            navigation.navigate("EpisodeDetailsScreen", { episode });
-          }}
-          style={{
-            backgroundColor: "#332e59",
-            margin: 1,
-            paddingHorizontal: 10,
-            paddingVertical: 20,
-            borderRadius: 10,
-            flexDirection: "row",
-          }}
-        >
-          <SharedElement id={imageEpisode.id(episode.id)}>
-            <Image
-              source={{
-                uri:
-                  episode?.image?.medium ||
-                  "https://media.comicbook.com/files/img/default-movie.png",
-              }}
-              style={styles.imageEpisode}
-              resizeMode="cover"
-            />
-          </SharedElement>
-          <View
-            style={{ flexDirection: "column", padding: 10, marginRight: 20 }}
-          >
-            <Text numberOfLines={1} style={styles.textEpisodeTitle}>
-              {episode.name}
-            </Text>
-            <Text style={styles.textEpisodeTitle}>
-              S{episode.season}E{episode.number}
-            </Text>
-          </View>
-        </TouchableOpacity>
+          episode={episode}
+          navigation={navigation}
+        />
       ))}
     </View>
   );
@@ -137,24 +114,7 @@ const Details = ({ navigation, route }) => {
       data={genres}
       horizontal={true}
       showsHorizontalScrollIndicator={false}
-      renderItem={({ item }) => (
-        <View
-          style={{
-            marginHorizontal: 4,
-            backgroundColor: "#8949aa",
-            borderRadius: 25,
-            padding: 4,
-          }}
-        >
-          <Text
-            style={{
-              color: "white",
-            }}
-          >
-            {item}
-          </Text>
-        </View>
-      )}
+      renderItem={({ item }) => <GenreContainer genre={item} />}
     />
   );
 
@@ -187,16 +147,20 @@ const Details = ({ navigation, route }) => {
     </SharedElement>
   );
 
+  const _renderLoading = () => (
+    <ActivityIndicator style={{ paddingBottom: 50 }} />
+  );
+
   return (
     <View style={styles.container}>
       {_renderImage(
-        item.id,
-        item?.image?.original ||
+        show.id,
+        show?.image?.original ||
           "https://media.comicbook.com/files/img/default-movie.png"
       )}
 
       <View style={styles.titleContainer}>
-        {_renderIcon(item.id)}
+        {_renderIcon(show.id)}
         <View
           style={{
             flex: 1,
@@ -204,24 +168,30 @@ const Details = ({ navigation, route }) => {
             justifyContent: "space-between",
           }}
         >
-          {_renderTitle(item.id, item.name)}
+          {_renderTitle(show.id, show.name)}
           <MaterialCommunityIcons
-            name="heart-outline"
+            name={liked ? "heart" : "heart-outline"}
             size={28}
             color="#fff"
-            onPress={() => {}}
+            onPress={() => {
+              dispatch(toggleLike(show.name + "_" + show.id));
+            }}
           />
         </View>
       </View>
 
       <ScrollView style={styles.scrollView}>
-        {_renderGenres(item.genres)}
+        {_renderGenres(show.genres)}
 
         <Text style={styles.textDescription}>
-          {removeHTMLTags(item.summary)}
+          {removeHTMLTags(show.summary)}
         </Text>
 
-        {_renderSeasons()}
+        {_renderSchedule(show.schedule, show.averageRuntime)}
+
+        {_renderSeasons(seasons)}
+
+        {loading && _renderLoading()}
 
         {_renderEpisodes(seasons[currentSeasonVisible])}
       </ScrollView>
@@ -230,25 +200,25 @@ const Details = ({ navigation, route }) => {
 };
 
 Details.sharedElements = (route) => {
-  const { item } = route.params;
+  const show: Show = route.params.show;
   return [
     {
-      id: image.id(item.id),
+      id: image.id(show.id),
       animation: image.animation,
       resize: image.resize,
     },
     {
-      id: title.id(item.id),
+      id: title.id(show.id),
       animation: title.animation,
       resize: title.resize,
     },
     {
-      id: description.id(item.id),
+      id: description.id(show.id),
       animation: description.animation,
       resize: description.resize,
     },
     {
-      id: icon.id(item.id),
+      id: icon.id(show.id),
       animation: icon.animation,
       resize: icon.resize,
     },

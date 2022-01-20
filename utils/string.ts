@@ -1,2 +1,2 @@
-export const removeHTMLTags = (value: string) =>
-  value.replace(/<[^>]*>?/gm, "");
+export const removeHTMLTags = (value: string = "") =>
+  value !== undefined && value !== null ? value.replace(/<[^>]*>?/gm, "") : "";
